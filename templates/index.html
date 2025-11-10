@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F1 Dashboard Generator</title>
+    <style>
+        /* --- START: DARK MODE CSS --- */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #121212; /* Dark background */
+            color: #e0e0e0; /* Light text */
+            margin: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            background: #1e1e1e; /* Darker container background */
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); /* Darker shadow */
+        }
+        h1 {
+            color: #e10600; /* F1 Red */
+        }
+        h2 {
+            color: #e0e0e0; /* Light text for subheadings */
+        }
+        p {
+            color: #b0b0b0; /* Slightly dimmer text */
+        }
+        .form-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: flex-end;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #e0e0e0;
+        }
+        select {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #555; /* Darker border */
+            font-size: 16px;
+            background-color: #333; /* Dark select-box */
+            color: #e0e0e0; /* Light text */
+        }
+        button {
+            background-color: #e10600;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            height: 38px;
+        }
+        button:disabled {
+            background-color: #555; /* Darker disabled state */
+            color: #aaa;
+            cursor: not-allowed;
+        }
+        .loading-message {
+            display: none;
+            padding: 10px;
+            background-color: #4a4a2a; /* Dark yellow/olive */
+            border: 1px solid #888844;
+            color: #e0e0e0;
+            border-radius: 4px;
+        }
+        .error {
+            padding: 10px;
+            background-color: #4a2a2a; /* Dark red */
+            border: 1px solid #884444;
+            color: #f5c6cb; /* Light red text for contrast */
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            margin-top: 20px;
+            border-radius: 4px; /* Soften image edges */
+        }
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .results-table th, .results-table td {
+            border: 1px solid #444; /* Darker table borders */
+            padding: 8px;
+            text-align: left;
+        }
+        .results-table th {
+            background-color: #333; /* Dark header */
+            color: #e0e0e0;
+        }
+        .results-table tbody tr:nth-child(even) {
+            background-color: #2a2a2a; /* Slightly lighter stripe */
+        }
+        .results-table tbody tr:nth-child(odd) {
+            background-color: #1e1e1e; /* Match container bg */
+        }
+        /* --- END: DARK MODE CSS --- */
+        
+        
+        /* --- START: NEW PODIUM CSS --- */
+        /* These will override the dark mode table stripes. */
+        .podium-1 {
+            background-color: #6a5c18 !important; /* Dark Gold */
+            font-weight: bold;
+        }
+        .podium-2 {
+            background-color: #5a5a5a !important; /* Dark Silver */
+        }
+        .podium-3 {
+            background-color: #6a3e18 !important; /* Dark Bronze */
+        }
+        /* --- END: NEW PODIUM CSS --- */
+
+
+        /* --- START: NEW MOBILE RESPONSIVE CSS --- */
+        @media (max-width: 768px) {
+            body {
+                margin: 10px; /* Reduce body margin */
+                font-size: 16px; /* Ensure readable base font size */
+            }
+            
+            .container {
+                padding: 10px; /* Reduce container padding */
+                margin: 0;
+                width: 100%;
+                box-sizing: border-box; /* Include padding in width calculation */
+            }
+
+            h1 {
+                font-size: 1.8rem; /* Smaller main title */
+            }
+            
+            h2 {
+                font-size: 1.4rem; /* Smaller sub-titles */
+            }
+
+            .form-container {
+                flex-direction: column; /* Stack all form items vertically */
+                gap: 15px; /* Reduce gap */
+                align-items: stretch; /* Make all groups full width */
+            }
+            
+            .form-group {
+                width: 100%; /* Make each group full-width */
+            }
+            
+            select, button {
+                width: 100%; /* Make inputs full-width for easy tapping */
+            }
+
+            /* This makes the table scrollable horizontally */
+            .results-table {
+                display: block; /* Allows the table to be treated as a block for overflow */
+                width: 100%; /* Force it to 100% of its container */
+                overflow-x: auto; /* Enable horizontal scrolling *for the table* */
+                -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+            }
+
+            .results-table th, .results-table td {
+                white-space: nowrap; /* Stop text from wrapping, making scrolling cleaner */
+                min-width: 120px; /* Give columns a reasonable minimum width */
+            }
+        }
+        /* --- END: NEW MOBILE RESPONSIVE CSS --- */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>F1 Data Dashboard</h1>
+        <p>Select a Year, Race, and Driver to generate the analysis dashboard.</p>
+
+        <form id="analysis-form" action="/" method="GET">
+            <div class="form-container">
+                <div class="form-group">
+                    <label for="year">1. Select Year:</label>
+                    <select name="year" id="year" onchange="window.location.href = '/?year=' + this.value;">
+                        <option value="">-- Select Year --</option>
+                        {% for y in years %}
+                            <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                {% if races %}
+                <div class="form-group">
+                    <label for="race">2. Select Race:</label>
+                    <select name="race" id="race" onchange="window.location.href = '/?year={{ selected_year }}&race=' + this.value;">
+                        <option value="">-- Select Race --</option>
+                        {% for r in races %}
+                            <option value="{{ r }}" {% if r == selected_race %}selected{% endif %}>{{ r }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+
+                {% if drivers %}
+                <div class="form-group">
+                    <label for="driver">3. Select Driver:</label>
+                    <select name="driver" id="driver">
+                        <option value="">-- Select Driver --</option>
+                        <option value="ALL" {% if "ALL" == selected_driver %}selected{% endif %}>ALL Drivers (Race Result)</option>
+                        {% for d in drivers %}
+                            <option value="{{ d }}" {% if d == selected_driver %}selected{% endif %}>{{ d }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+
+                {% if drivers %}
+                <div class="form-Example-wrapper">
+                    <button type="submit" id="submit-button">Show Analysis</button>
+                </div>
+                {% endif %}
+            </div>
+        </form>
+
+        <div class="loading-message" id="loading">
+            <strong>Generating dashboard...</strong> This may take 30-60 seconds as `fastf1` downloads and processes all data. Please be patient.
+        </div>
+
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+
+        {% if results_data %}
+            <h2>Race Results - {{ selected_year }} {{ selected_race }}</h2>
+            <table class="results-table">
+                <thead>
+                    <tr>
+                        <th>Pos</th>
+                        <th>Driver</th>
+                        <th>Full Name</th>
+                        <th>Team</th>
+                        <th>Time</th>
+                        <th>Laps</th>
+                        <th>Status</th>
+                        <th>Points</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in results_data %}
+                    <tr {% if row.Position == 1 %} class="podium-1"
+                        {% elif row.Position == 2 %} class="podium-2"
+                        {% elif row.Position == 3 %} class="podium-3"
+                        {% endif %}>
+                    <td>{{ row.Position }}</td>
+                        <td>{{ row.Driver }}</td>
+                        <td>{{ row.FullName }}</td>
+                        <td>{{ row.Team }}</td>
+                        <td>{{ row.Time }}</td>
+                        <td>{{ row.Laps }}</td>
+                        <td>{{ row.Status }}</td>
+                        <td>{{ row.Points }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+
+        {% if plot_data %}
+            <h2>Dashboard for {{ selected_driver }} - {{ selected_year }} {{ selected_race }}</h2>
+            <img src="{{ plot_data }}" alt="F1 Dashboard">
+        {% endif %}
+    </div>
+
+    <script>
+        document.getElementById('analysis-form').addEventListener('submit', function(e) {
+            var driver = document.getElementById('driver');
+            // Check if a driver is selected (either "ALL" or a specific one)
+            if (driver && driver.value) {
+                // Show the loading message
+                document.getElementById('loading').style.display = 'block';
+                
+                // Find the button and change its text
+                var button = document.getElementById('submit-button');
+                if (button) {
+                    button.disabled = true;
+                    button.innerText = 'Analyzing...';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
