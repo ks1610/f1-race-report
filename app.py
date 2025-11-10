@@ -9,6 +9,7 @@ import base64
 import datetime
 import pandas as pd # Import pandas
 from flask import Flask, render_template, request
+import os
 
 # 1. Setup Flask App
 app = Flask(__name__)
@@ -16,6 +17,9 @@ app = Flask(__name__)
 # 2. Setup fastf1 and enable cache (must be a folder named 'cache')
 #fastf1.plotting.setup_mpl()
 fastf1.plotting.setup_mpl(dark=True)
+cache_dir = 'cache'
+if not os.path.exists(cache_dir):
+    os.makedirs(cache_dir)
 fastf1.Cache.enable_cache('cache')
 
 # 3. YOUR DASHBOARD SCRIPT (Converted to a function)
